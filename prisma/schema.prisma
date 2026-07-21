@@ -1,0 +1,76 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum Role {
+  SELLER
+  BUYER
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  role         Role
+  createdAt    DateTime @default(now())
+  orders    Order[]
+
+  store        Store?   // a seller may have one store
+}
+
+model Store {
+  id          String   @id @default(uuid())
+  sellerId    String   @unique
+  seller      User     @relation(fields: [sellerId], references: [id])
+  storeName   String
+  description String?
+  createdAt   DateTime @default(now())
+  products  Product[]
+}
+
+model Product {
+  id          String      @id @default(uuid())
+  storeId     String
+  store       Store       @relation(fields: [storeId], references: [id])
+  name        String
+  description String?
+  price       Decimal
+  stock       Int
+  imageUrl    String?
+  createdAt   DateTime    @default(now())
+  orderItems  OrderItem[]
+}
+
+enum OrderStatus {
+  PENDING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+model Order {
+  id         String      @id @default(uuid())
+  buyerId    String
+  buyer      User        @relation(fields: [buyerId], references: [id])
+  status     OrderStatus @default(PENDING)
+  total      Decimal
+  createdAt  DateTime    @default(now())
+  orderItems OrderItem[]
+}
+
+model OrderItem {
+  id               String  @id @default(uuid())
+  orderId          String
+  order            Order   @relation(fields: [orderId], references: [id])
+  productId        String
+  product          Product @relation(fields: [productId], references: [id])
+  quantity         Int
+  priceAtPurchase  Decimal
+}
