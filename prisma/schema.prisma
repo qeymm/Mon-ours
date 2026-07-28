@@ -46,6 +46,10 @@ model Product {
   imageUrl    String?
   createdAt   DateTime    @default(now())
   orderItems  OrderItem[]
+   isDailyDrop   Boolean     @default(false)
+  batchDate     DateTime?   // which day this batch is for
+  batchQuantity Int?        // total made that day
+  quantitySold  Int         @default(0)
 }
 
 enum OrderStatus {
