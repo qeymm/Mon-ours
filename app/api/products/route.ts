@@ -51,11 +51,19 @@ export async function POST(req: NextRequest) {
   return NextResponse.json(product);
 }
 
-export async function GET() {
-  // public: browse all products (buyers use this)
+export async function GET(req: NextRequest) {
+  const { searchParams } = new URL(req.url);
+  const storeId = searchParams.get("storeId");
+  const dailyOnly = searchParams.get("dailyDrop") === "true";
+
   const products = await prisma.product.findMany({
-    include: { store: { select: { storeName: true, id: true } } },
+    where: {
+      ...(storeId ? { storeId } : {}),
+      ...(dailyOnly ? { isDailyDrop: true } : {}),
+    },
+    include: { store: { select: { id: true, storeName: true } } },
     orderBy: { createdAt: "desc" },
   });
+
   return NextResponse.json(products);
 }
