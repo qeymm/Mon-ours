@@ -70,11 +70,38 @@ export default function CartPage() {
           <button onClick={clearCart} className="border px-4 py-2 rounded">
             Clear Cart
           </button>
-          <button className="bg-black text-white px-4 py-2 rounded">
+          <button
+            onClick={handleCheckout}
+            className="bg-black text-white px-4 py-2 rounded"
+          >
             Checkout
           </button>
         </div>
       </div>
     </div>
   );
+
+  async function handleCheckout() {
+    const res = await fetch("/api/checkout", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        items: items.map((i) => ({
+          productId: i.productId,
+          quantity: i.quantity,
+        })),
+      }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      alert(data.error);
+      return;
+    }
+
+    clearCart();
+    alert("Order placed!");
+    // later: redirect to an order confirmation / order history page
+  }
 }
