@@ -23,6 +23,10 @@ export default function Header() {
             <button onClick={logout} className="text-sm underline">
               Logout
             </button>
+            {user.role === "BUYER" && <Link href="/orders">My Orders</Link>}
+            {user.role === "SELLER" && (
+              <Link href="/seller/orders">Incoming Orders</Link>
+            )}
           </>
         ) : (
           <>
