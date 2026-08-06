@@ -33,6 +33,8 @@ model Store {
   description String?
   createdAt   DateTime @default(now())
   products  Product[]
+  featuredProductId String?  @unique
+  featuredProduct   Product? @relation("FeaturedProduct", fields: [featuredProductId], references: [id])
   
 }
 
@@ -51,6 +53,7 @@ model Product {
   batchDate     DateTime?   // which day this batch is for
   batchQuantity Int?        // total made that day
   quantitySold  Int         @default(0)
+  featuredByStore   Store?   @relation("FeaturedProduct")
 }
 
 enum OrderStatus {
