@@ -28,6 +28,22 @@ export default function LoginPage() {
     }
 
     await refreshUser();
+
+    const meRes = await fetch("/api/auth/me");
+    const meData = await meRes.json();
+
+    if (meData.user?.role === "SELLER") {
+      const storeRes = await fetch("/api/store");
+      const storeData = await storeRes.json();
+
+      if (!storeData.store) {
+        router.push("/seller/setup-store");
+        return;
+      }
+      router.push("/seller/orders");
+      return;
+    }
+
     router.push("/products");
   }
 

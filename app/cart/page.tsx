@@ -2,9 +2,20 @@
 
 import { useCart } from "@/lib/cart-context";
 import Link from "next/link";
+import { useAuth } from "@/lib/auth-context";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 export default function CartPage() {
+  const { user } = useAuth();
+  const router = useRouter();
   const { items, removeItem, updateQuantity, total, clearCart } = useCart();
+
+  useEffect(() => {
+    if (user?.role === "SELLER") {
+      router.push("/seller/orders");
+    }
+  }, [user, router]);
 
   if (items.length === 0) {
     return (

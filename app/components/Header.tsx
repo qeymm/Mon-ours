@@ -3,38 +3,88 @@
 import Link from "next/link";
 import { useCart } from "@/lib/cart-context";
 import { useAuth } from "@/lib/auth-context";
+import { useRouter } from "next/navigation";
 
 export default function Header() {
   const { items } = useCart();
-  const itemCount = items.reduce((sum, i) => sum + i.quantity, 0);
+  const router = useRouter();
   const { user, logout } = useAuth();
+  const itemCount = items.reduce((sum, i) => sum + i.quantity, 0);
+
+  async function handleLogout() {
+    await logout();
+    router.push("/login");
+  }
 
   return (
-    <header className="flex justify-between items-center  p-4 border-b">
-      <Link href="/" className="font-bold text-lg">
-        Mon Ours
-      </Link>
-      <nav className="flex gap-4 items-center">
-        <Link href="/products">Products</Link>
-        <Link href="/cart">Cart</Link>
-        {user ? (
-          <>
-            <span className="text-sm">Hi, {user.name}</span>
-            <button onClick={logout} className="text-sm underline">
-              Logout
-            </button>
-            {user.role === "BUYER" && <Link href="/orders">My Orders</Link>}
-            {user.role === "SELLER" && (
-              <Link href="/seller/orders">Incoming Orders</Link>
-            )}
-          </>
-        ) : (
-          <>
-            <Link href="/login">Login</Link>
-            <Link href="/register">Register</Link>
-          </>
-        )}
-      </nav>
+    <header className="bg-surface border-b border-ink/10">
+      <div className="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
+        <Link
+          href="/"
+          className="font-display text-xl font-semibold text-brand"
+        >
+          Mon Ours
+        </Link>
+
+        <nav className="flex items-center gap-6 text-sm text-ink/80">
+          <Link href="/products" className="hover:text-accent transition">
+            Products
+          </Link>
+
+          {user?.role === "BUYER" && (
+            <Link href="/orders" className="hover:text-accent transition">
+              My Orders
+            </Link>
+          )}
+          {user?.role === "SELLER" && (
+            <Link
+              href="/seller/orders"
+              className="hover:text-accent transition"
+            >
+              Incoming Orders
+            </Link>
+          )}
+
+          {user?.role === "SELLER" && (
+            <Link
+              href="/seller/products"
+              className="hover:text-accent transition"
+            >
+              My Products
+            </Link>
+          )}
+
+          {user?.role !== "SELLER" && (
+            <Link href="/cart" className="hover:text-accent transition">
+              Cart {itemCount > 0 && `(${itemCount})`}
+            </Link>
+          )}
+
+          {user ? (
+            <div className="flex items-center gap-3 pl-4 border-l border-ink/10 hover-pointer">
+              <span className="text-ink/60">Hi, {user.name}</span>
+              <button
+                onClick={handleLogout}
+                className="text-accent hover:underline"
+              >
+                Logout
+              </button>
+            </div>
+          ) : (
+            <div className="flex items-center gap-3 pl-4 border-l border-ink/10">
+              <Link href="/login" className="hover:text-accent transition">
+                Login
+              </Link>
+              <Link
+                href="/register"
+                className="bg-brand text-white px-4 py-1.5 rounded-full hover:bg-brand/90 transition"
+              >
+                Register
+              </Link>
+            </div>
+          )}
+        </nav>
+      </div>
     </header>
   );
 }
