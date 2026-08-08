@@ -11,7 +11,11 @@ export async function PATCH(
   if (!user)
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
 
-  const order = await prisma.order.findUnique({ where: { id } });
+  const order = await prisma.order.findUnique({
+    where: { id },
+    include: { orderItems: { include: { product: true } } },
+  });
+
   if (!order) return NextResponse.json({ error: "Not found" }, { status: 404 });
   if (order.buyerId !== user.userId)
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
@@ -25,9 +29,25 @@ export async function PATCH(
     );
   }
 
-  const updated = await prisma.order.update({
-    where: { id },
-    data: { status: "CANCELLED" },
+  const updated = await prisma.$transaction(async (tx) => {
+    for (const item of order.orderItems) {
+      if (item.product.isDailyDrop) {
+        await tx.product.update({
+          where: { id: item.productId },
+          data: { quantitySold: { decrement: item.quantity } },
+        });
+      } else {
+        await tx.product.update({
+          where: { id: item.productId },
+          data: { stock: { increment: item.quantity } },
+        });
+      }
+    }
+
+    return tx.order.update({
+      where: { id },
+      data: { status: "CANCELLED" },
+    });
   });
 
   return NextResponse.json(updated);

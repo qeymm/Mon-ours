@@ -5,9 +5,9 @@ import { prisma } from "@/lib/prisma";
 export async function GET(req: NextRequest) {
   const user = getCurrentUser(req);
   if (!user)
-    return NextResponse.json({ error: "Not Authenticated" }, { status: 401 });
+    return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
   if (user.role !== "SELLER")
-    return NextResponse.json({ error: "Seller Only" }, { status: 403 });
+    return NextResponse.json({ error: "Sellers only" }, { status: 403 });
 
   const store = await prisma.store.findUnique({
     where: { sellerId: user.userId },
@@ -20,10 +20,16 @@ export async function GET(req: NextRequest) {
     include: {
       product: { select: { name: true } },
       order: {
-        select: { id: true, status: true, createdAt: true, buyerId: true },
+        select: {
+          id: true,
+          status: true,
+          createdAt: true,
+          buyer: { select: { name: true } },
+        },
       },
     },
     orderBy: { order: { createdAt: "desc" } },
   });
+
   return NextResponse.json(orderItems);
 }

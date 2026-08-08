@@ -48,20 +48,22 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="p-8 max-w-sm mx-auto">
-      <h1 className="text-2xl font-bold mb-4">Login</h1>
+    <div className="max-w-sm mx-auto px-6 py-16">
+      <h1 className="font-display text-2xl font-semibold text-ink mb-6 text-center">
+        Welcome back
+      </h1>
       <form onSubmit={handleSubmit} className="space-y-3">
         <input
           placeholder="Email"
           type="email"
-          className="border p-2 w-full rounded"
+          className="border border-ink/15 p-3 w-full rounded-xl bg-surface"
           value={form.email}
           onChange={(e) => setForm({ ...form, email: e.target.value })}
         />
         <input
           placeholder="Password"
           type="password"
-          className="border p-2 w-full rounded"
+          className="border border-ink/15 p-3 w-full rounded-xl bg-surface"
           value={form.password}
           onChange={(e) => setForm({ ...form, password: e.target.value })}
         />
@@ -70,11 +72,17 @@ export default function LoginPage() {
 
         <button
           type="submit"
-          className="bg-black text-white w-full py-2 rounded"
+          className="bg-brand text-white w-full py-3 rounded-full font-medium hover:bg-brand/90 transition"
         >
           Login
         </button>
       </form>
+      <p className="text-center text-sm text-ink/60 mt-4">
+        New here?{" "}
+        <a href="/register" className="text-accent hover:underline">
+          Create an account
+        </a>
+      </p>
     </div>
   );
 }

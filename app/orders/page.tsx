@@ -45,54 +45,77 @@ export default function OrderPage() {
     );
   }
 
-  if (loading) return <div className="p-8"> Loading... </div>;
-  if (orders.length === 0) return <div className="p-8">No orders yet.</div>;
+  if (loading)
+    return (
+      <div className="max-w-2xl mx-auto px-6 py-16 text-ink/50">Loading...</div>
+    );
+  if (orders.length === 0) {
+    return (
+      <div className="max-w-2xl mx-auto px-6 py-16 text-center">
+        <h1 className="font-display text-2xl font-semibold text-ink mb-2">
+          Order History
+        </h1>
+        <p className="text-ink/60">No orders yet.</p>
+      </div>
+    );
+  }
 
   return (
-    <div className="p-8 max-w-2xl">
-      <h1 className="text-2xl font-bold mb-6">Order History</h1>
+    <div className="max-w-2xl mx-auto px-6 py-10">
+      <h1 className="font-display text-2xl font-semibold text-ink mb-6">
+        Order History
+      </h1>
 
-      <div className="space-y-6">
-        {orders.map((order) => (
-          <div key={order.id} className="border rounded p-4">
-            <div className="flex justify-between items-center mb-2">
-              <span className="font-semibold">
-                Order #{order.id.slice(0, 8)}
-              </span>
-              <span
-                className={`text-sm px-2 py-1 rounded ${
-                  order.status === "CANCELLED"
-                    ? "bg-red-100 text-red-700"
-                    : order.status === "DELIVERED"
-                      ? "bg-green-100 text-green-700"
-                      : "bg-yellow-100 text-yellow-700"
-                }`}
-              >
-                {order.status}
-              </span>
-            </div>
-            <ul className=" text-sm text-gray-600 mb-2">
-              {order.orderItems.map((item) => (
-                <li key={item.id}>
-                  {item.quantity} x {item.product.name} (${item.priceAtPurchase}{" "}
-                  each)
-                </li>
-              ))}
-            </ul>
+      <div className="space-y-4">
+        {orders.map((order) => {
+          const statusStyles: Record<string, string> = {
+            PENDING: "bg-amber-100 text-amber-700",
+            SHIPPED: "bg-blue-100 text-blue-700",
+            DELIVERED: "bg-green-100 text-green-700",
+            CANCELLED: "bg-red-100 text-red-700",
+          };
 
-            <div className=" flex justify-between items-center">
-              <span className="font-semibold"> Total: ${order.total}</span>
-              {order.status === "PENDING" && (
-                <button
-                  onClick={() => handleCancel(order.id)}
-                  className="text-red-600 text-sm underline"
+          return (
+            <div
+              key={order.id}
+              className="bg-surface border border-ink/10 rounded-2xl p-5"
+            >
+              <div className="flex justify-between items-center mb-3">
+                <span className="font-semibold text-ink">
+                  Order #{order.id.slice(0, 8)}
+                </span>
+                <span
+                  className={`text-xs font-medium px-3 py-1 rounded-full ${statusStyles[order.status]}`}
                 >
-                  Cancel Order
-                </button>
-              )}
+                  {order.status}
+                </span>
+              </div>
+
+              <ul className="text-sm text-ink/60 space-y-1 mb-3">
+                {order.orderItems.map((item) => (
+                  <li key={item.id}>
+                    {item.quantity} × {item.product.name} — $
+                    {item.priceAtPurchase}
+                  </li>
+                ))}
+              </ul>
+
+              <div className="flex justify-between items-center border-t border-ink/10 pt-3">
+                <span className="font-semibold text-ink">
+                  Total: ${order.total}
+                </span>
+                {order.status === "PENDING" && (
+                  <button
+                    onClick={() => handleCancel(order.id)}
+                    className="text-red-600 text-sm hover:underline"
+                  >
+                    Cancel Order
+                  </button>
+                )}
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

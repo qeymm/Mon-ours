@@ -23,7 +23,6 @@ export async function PATCH(
   if (!store)
     return NextResponse.json({ error: "No store found" }, { status: 400 });
 
-  //Confirm this seller actually has a product in this order
   const hasItem = await prisma.orderItem.findFirst({
     where: { orderId: id, product: { storeId: store.id } },
   });

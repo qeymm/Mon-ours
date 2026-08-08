@@ -30,9 +30,16 @@ export async function POST(req: NextRequest) {
     );
 
   try {
-    const order = await prisma.$transaction(async (tx) => {
-      let total = 0;
-      const orderItemsData = [];
+    const orders = await prisma.$transaction(async (tx) => {
+      // Look up all products first, group cart items by storeId
+      const grouped = new Map<
+        string,
+        {
+          productId: string;
+          quantity: number;
+          product: Awaited<ReturnType<typeof tx.product.findUniqueOrThrow>>;
+        }[]
+      >();
 
       for (const item of parsed.data.items) {
         const product = await tx.product.findUnique({
@@ -40,47 +47,62 @@ export async function POST(req: NextRequest) {
         });
         if (!product) throw new Error(`Product ${item.productId} not found`);
 
-        // "Today's Bake" stock check
-        if (product.isDailyDrop) {
-          const remaining = (product.batchQuantity ?? 0) - product.quantitySold;
-          if (item.quantity > remaining) {
-            throw new Error(`Only ${remaining} left of ${product.name}`);
-          }
-          await tx.product.update({
-            where: { id: product.id },
-            data: { quantitySold: { increment: item.quantity } },
-          });
-        } else {
-          if (item.quantity > product.stock) {
-            throw new Error(`Only ${product.stock} left of ${product.name}`);
-          }
-          await tx.product.update({
-            where: { id: product.id },
-            data: { stock: { decrement: item.quantity } },
-          });
-        }
-
-        const priceAtPurchase = Number(product.price);
-        total += priceAtPurchase * item.quantity;
-        orderItemsData.push({
-          productId: product.id,
+        const list = grouped.get(product.storeId) ?? [];
+        list.push({
+          productId: item.productId,
           quantity: item.quantity,
-          priceAtPurchase,
+          product,
         });
+        grouped.set(product.storeId, list);
       }
 
-      return tx.order.create({
-        data: {
-          buyerId: user.userId,
-          total,
-          status: "PENDING",
-          orderItems: { create: orderItemsData },
-        },
-        include: { orderItems: true },
-      });
+      const createdOrders = [];
+
+      for (const [, entries] of grouped) {
+        let storeTotal = 0;
+        const orderItemsData = [];
+
+        for (const { productId, quantity, product } of entries) {
+          if (product.isDailyDrop) {
+            const remaining =
+              (product.batchQuantity ?? 0) - product.quantitySold;
+            if (quantity > remaining)
+              throw new Error(`Only ${remaining} left of ${product.name}`);
+            await tx.product.update({
+              where: { id: productId },
+              data: { quantitySold: { increment: quantity } },
+            });
+          } else {
+            if (quantity > product.stock)
+              throw new Error(`Only ${product.stock} left of ${product.name}`);
+            await tx.product.update({
+              where: { id: productId },
+              data: { stock: { decrement: quantity } },
+            });
+          }
+
+          const priceAtPurchase = Number(product.price);
+          storeTotal += priceAtPurchase * quantity;
+          orderItemsData.push({ productId, quantity, priceAtPurchase });
+        }
+
+        const order = await tx.order.create({
+          data: {
+            buyerId: user.userId,
+            total: storeTotal,
+            status: "PENDING",
+            orderItems: { create: orderItemsData },
+          },
+          include: { orderItems: true },
+        });
+
+        createdOrders.push(order);
+      }
+
+      return createdOrders;
     });
 
-    return NextResponse.json(order);
+    return NextResponse.json(orders);
   } catch (err) {
     const message = err instanceof Error ? err.message : "Checkout failed";
     return NextResponse.json({ error: message }, { status: 400 });

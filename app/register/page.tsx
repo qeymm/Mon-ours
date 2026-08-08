@@ -36,47 +36,72 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="p-8 max-w-sm mx-auto">
-      <h1 className="text-2xl font-bold mb-4">Register</h1>
-      <form onSubmit={handleSubmit} className="space-y-4">
+    <div className="max-w-sm mx-auto px-6 py-16">
+      <h1 className="font-display text-2xl font-semibold text-ink mb-6 text-center">
+        Create an account
+      </h1>
+      <form onSubmit={handleSubmit} className="space-y-3">
         <input
           placeholder="Name"
-          className="border p-2 w-full rounded"
+          className="border border-ink/15 p-3 w-full rounded-xl bg-surface"
           value={form.name}
           onChange={(e) => setForm({ ...form, name: e.target.value })}
         />
         <input
           placeholder="Email"
           type="email"
-          className="border p-2 w-full rounded"
+          className="border border-ink/15 p-3 w-full rounded-xl bg-surface"
           value={form.email}
           onChange={(e) => setForm({ ...form, email: e.target.value })}
         />
         <input
           placeholder="Password"
           type="password"
-          className="border p-2 w-full rounded"
+          className="border border-ink/15 p-3 w-full rounded-xl bg-surface"
           value={form.password}
           onChange={(e) => setForm({ ...form, password: e.target.value })}
         />
-        <select
-          className="border p-2 w-full rounded"
-          value={form.role}
-          onChange={(e) => setForm({ ...form, role: e.target.value })}
-        >
-          <option value="BUYER">Buyer</option>
-          <option value="SELLER">Seller</option>
-        </select>
+
+        <div className="flex gap-3">
+          <button
+            type="button"
+            onClick={() => setForm({ ...form, role: "BUYER" })}
+            className={`flex-1 py-2 rounded-full text-sm border transition ${
+              form.role === "BUYER"
+                ? "bg-brand text-white border-brand"
+                : "border-ink/15 text-ink/60"
+            }`}
+          >
+            I'm a Buyer
+          </button>
+          <button
+            type="button"
+            onClick={() => setForm({ ...form, role: "SELLER" })}
+            className={`flex-1 py-2 rounded-full text-sm border transition ${
+              form.role === "SELLER"
+                ? "bg-brand text-white border-brand"
+                : "border-ink/15 text-ink/60"
+            }`}
+          >
+            I'm a Seller
+          </button>
+        </div>
 
         {error && <p className="text-red-600 text-sm">{error}</p>}
 
         <button
           type="submit"
-          className="bg-black text-white w-full py-2 rounded"
+          className="bg-brand text-white w-full py-3 rounded-full font-medium hover:bg-brand/90 transition"
         >
           Register
         </button>
       </form>
+      <p className="text-center text-sm text-ink/60 mt-4">
+        Already have an account?{" "}
+        <a href="/login" className="text-accent hover:underline">
+          Login
+        </a>
+      </p>
     </div>
   );
 }
