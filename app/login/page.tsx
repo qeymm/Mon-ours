@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { useCart } from "@/lib/cart-context";
+import { toast } from "sonner";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -31,17 +32,11 @@ export default function LoginPage() {
 
     await refreshUser();
 
-    const pending = localStorage.getItem("pendingCartItem");
-    if (pending) {
-      addItem(JSON.parse(pending));
-      localStorage.removeItem("pendingCartItem");
-      router.push("/cart");
-      return;
-    }
     const meRes = await fetch("/api/auth/me");
     const meData = await meRes.json();
 
     if (meData.user?.role === "SELLER") {
+      localStorage.removeItem("pendingCartItem");
       const storeRes = await fetch("/api/store");
       const storeData = await storeRes.json();
 
@@ -50,6 +45,16 @@ export default function LoginPage() {
         return;
       }
       router.push("/seller/orders");
+      return;
+    }
+
+    const pending = localStorage.getItem("pendingCartItem");
+    if (pending) {
+      const item = JSON.parse(pending);
+      addItem(item);
+      localStorage.removeItem("pendingCartItem");
+      toast.success(`Added ${item.name} to cart`);
+      router.push("/cart");
       return;
     }
 
