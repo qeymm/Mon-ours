@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { Skeleton } from "@/app/components/skeleton";
+import { EmptyState } from "@/app/components/EmptyState";
 
 interface OrderItem {
   id: string;
@@ -30,6 +32,7 @@ export default function OrderPage() {
         setLoading(false);
       });
   }, []);
+
   async function handleCancel(orderId: string) {
     const res = await fetch(`/api/orders/${orderId}/cancel`, {
       method: "PATCH",
@@ -46,18 +49,35 @@ export default function OrderPage() {
     );
   }
 
-  if (loading)
+  if (loading) {
     return (
-      <div className="max-w-2xl mx-auto px-6 py-16 text-ink/50">Loading...</div>
-    );
-  if (orders.length === 0) {
-    return (
-      <div className="max-w-2xl mx-auto px-6 py-16 text-center">
-        <h1 className="font-display text-2xl font-semibold text-ink mb-2">
+      <div className="max-w-2xl mx-auto px-6 py-10">
+        <h1 className="font-display text-2xl font-semibold text-ink mb-6">
           Order History
         </h1>
-        <p className="text-ink/60">No orders yet.</p>
+        <div className="space-y-4">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div
+              key={i}
+              className="bg-surface border border-ink/10 rounded-2xl p-5 space-y-3"
+            >
+              <Skeleton className="h-4 w-1/3" />
+              <Skeleton className="h-3 w-full" />
+              <Skeleton className="h-3 w-2/3" />
+            </div>
+          ))}
+        </div>
       </div>
+    );
+  }
+  if (orders.length === 0) {
+    return (
+      <EmptyState
+        icon="📦"
+        title="No orders yet"
+        description="When you order something, it'll show up here."
+        action={{ label: "Browse pastries", href: "/products" }}
+      />
     );
   }
 

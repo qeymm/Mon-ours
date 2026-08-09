@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { EmptyState } from "@/app/components/EmptyState";
 
 interface Product {
   id: string;
@@ -292,7 +293,11 @@ export default function SellerProductsPage() {
         ))}
 
         {products.length === 0 && (
-          <p className="text-ink/50 text-sm">No products yet.</p>
+          <EmptyState
+            icon="🧁"
+            title="No products yet"
+            description="Add your first pastry using the form above."
+          />
         )}
       </div>
     </div>

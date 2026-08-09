@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import { Skeleton } from "@/app/components/skeleton";
 
 interface FeaturedEntry {
   id: string;
@@ -20,11 +21,15 @@ interface FeaturedEntry {
 
 export default function Hero() {
   const [featured, setFeatured] = useState<FeaturedEntry[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetch("/api/featured")
       .then((res) => res.json())
-      .then((data) => setFeatured(Array.isArray(data) ? data : []));
+      .then((data) => {
+        setFeatured(Array.isArray(data) ? data : []);
+        setLoading(false);
+      });
   }, []);
 
   return (
@@ -54,62 +59,83 @@ export default function Hero() {
         </h2>
 
         <div className="flex gap-4 overflow-x-auto pb-2">
-          {featured.map((entry) => {
-            const p = entry.featuredProduct;
-            if (!p) return null;
-
-            const remaining = p.isDailyDrop
-              ? (p.batchQuantity ?? 0) - p.quantitySold
-              : p.stock;
-
-            return (
+          {loading ? (
+            Array.from({ length: 4 }).map((_, i) => (
               <div
-                key={entry.id}
-                className="relative flex-shrink-0 w-56 bg-surface rounded-2xl shadow-sm overflow-hidden"
+                key={i}
+                className="flex-shrink-0 w-56 bg-surface rounded-2xl shadow-sm overflow-hidden"
               >
-                {p.isDailyDrop && (
-                  <span className="absolute top-3 left-3 z-10 bg-stamp text-white text-xs font-medium px-3 py-1 rounded-full rotate-[-4deg] border border-dashed border-white/60">
-                    Today's Bake
-                  </span>
-                )}
-
-                <div className="relative w-full h-36 bg-ink/5">
-                  {p.imageUrl ? (
-                    <Image
-                      src={p.imageUrl}
-                      alt={p.name}
-                      fill
-                      className="object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-ink/30 text-sm">
-                      No image
-                    </div>
-                  )}
-                </div>
-
-                <div className="p-4">
-                  <p className="font-display font-semibold text-ink">
-                    {p.name}
-                  </p>
-                  <p className="text-sm text-ink/60">{entry.storeName}</p>
+                <Skeleton className="w-full h-36 rounded-none" />
+                <div className="p-4 space-y-2">
+                  <Skeleton className="h-4 w-3/4" />
+                  <Skeleton className="h-3 w-1/2" />
                   <div className="flex justify-between items-center mt-2">
-                    <span className="text-accent font-semibold">
-                      ${p.price}
-                    </span>
-                    <span className="text-xs text-ink/50">
-                      {remaining} left
-                    </span>
+                    <Skeleton className="h-4 w-12" />
+                    <Skeleton className="h-3 w-10" />
                   </div>
                 </div>
               </div>
-            );
-          })}
+            ))
+          ) : (
+            <>
+              {featured.map((entry) => {
+                const p = entry.featuredProduct;
+                if (!p) return null;
 
-          {featured.length === 0 && (
-            <p className="text-ink/50 text-sm">
-              No featured pastries yet — check back soon.
-            </p>
+                const remaining = p.isDailyDrop
+                  ? (p.batchQuantity ?? 0) - p.quantitySold
+                  : p.stock;
+
+                return (
+                  <div
+                    key={entry.id}
+                    className="relative flex-shrink-0 w-56 bg-surface rounded-2xl shadow-sm overflow-hidden"
+                  >
+                    {p.isDailyDrop && (
+                      <span className="absolute top-3 left-3 z-10 bg-stamp text-white text-xs font-medium px-3 py-1 rounded-full rotate-[-4deg] border border-dashed border-white/60">
+                        Today's Bake
+                      </span>
+                    )}
+
+                    <div className="relative w-full h-36 bg-ink/5">
+                      {p.imageUrl ? (
+                        <Image
+                          src={p.imageUrl}
+                          alt={p.name}
+                          fill
+                          className="object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-ink/30 text-sm">
+                          No image
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="p-4">
+                      <p className="font-display font-semibold text-ink">
+                        {p.name}
+                      </p>
+                      <p className="text-sm text-ink/60">{entry.storeName}</p>
+                      <div className="flex justify-between items-center mt-2">
+                        <span className="text-accent font-semibold">
+                          ${p.price}
+                        </span>
+                        <span className="text-xs text-ink/50">
+                          {remaining} left
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+
+              {featured.length === 0 && (
+                <p className="text-ink/50 text-sm">
+                  No featured pastries yet — check back soon.
+                </p>
+              )}
+            </>
           )}
         </div>
       </div>

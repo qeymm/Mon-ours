@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { Skeleton } from "@/app/components/skeleton";
+import { EmptyState } from "@/app/components/EmptyState";
 
 interface SellerOrderItem {
   id: string;
@@ -82,18 +84,34 @@ export default function SellerOrdersPage() {
     CANCELLED: "bg-red-100 text-red-700",
   };
 
-  if (loading)
+  if (loading) {
     return (
-      <div className="max-w-2xl mx-auto px-6 py-16 text-ink/50">Loading...</div>
-    );
-  if (groups.length === 0) {
-    return (
-      <div className="max-w-2xl mx-auto px-6 py-16 text-center">
-        <h1 className="font-display text-2xl font-semibold text-ink mb-2">
+      <div className="max-w-2xl mx-auto px-6 py-10">
+        <h1 className="font-display text-2xl font-semibold text-ink mb-6">
           Incoming Orders
         </h1>
-        <p className="text-ink/60">No orders yet.</p>
+        <div className="space-y-4">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div
+              key={i}
+              className="bg-surface border border-ink/10 rounded-2xl p-5 space-y-3"
+            >
+              <Skeleton className="h-4 w-1/3" />
+              <Skeleton className="h-3 w-full" />
+              <Skeleton className="h-3 w-2/3" />
+            </div>
+          ))}
+        </div>
       </div>
+    );
+  }
+  if (groups.length === 0) {
+    return (
+      <EmptyState
+        icon="📭"
+        title="No orders yet"
+        description="Once buyers order from your shop, they'll appear here."
+      />
     );
   }
 

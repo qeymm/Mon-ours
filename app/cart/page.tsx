@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
+import { EmptyState } from "@/app/components/EmptyState";
 
 export default function CartPage() {
   const { items, removeItem, updateQuantity, total, clearCart } = useCart();
@@ -44,15 +45,12 @@ export default function CartPage() {
 
   if (items.length === 0) {
     return (
-      <div className="max-w-2xl mx-auto px-6 py-16 text-center">
-        <h1 className="font-display text-2xl font-semibold text-ink mb-2">
-          Your Cart
-        </h1>
-        <p className="text-ink/60 mb-4">Your cart is empty.</p>
-        <Link href="/products" className="text-accent hover:underline">
-          Browse pastries →
-        </Link>
-      </div>
+      <EmptyState
+        icon="🛒"
+        title="Your cart is empty"
+        description="Looks like you haven't added any pastries yet."
+        action={{ label: "Browse pastries", href: "/products" }}
+      />
     );
   }
 
