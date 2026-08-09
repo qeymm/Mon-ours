@@ -3,12 +3,14 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
+import { useCart } from "@/lib/cart-context";
 
 export default function LoginPage() {
   const router = useRouter();
   const { refreshUser } = useAuth();
   const [form, setForm] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
+  const { addItem } = useCart();
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -29,6 +31,13 @@ export default function LoginPage() {
 
     await refreshUser();
 
+    const pending = localStorage.getItem("pendingCartItem");
+    if (pending) {
+      addItem(JSON.parse(pending));
+      localStorage.removeItem("pendingCartItem");
+      router.push("/cart");
+      return;
+    }
     const meRes = await fetch("/api/auth/me");
     const meData = await meRes.json();
 

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import { useCart } from "@/lib/cart-context";
 import { useAuth } from "@/lib/auth-context";
+import { useRouter } from "next/navigation";
 
 interface Product {
   id: string;
@@ -22,12 +23,36 @@ export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const { addItem } = useCart();
   const { user } = useAuth();
+  const router = useRouter();
 
   useEffect(() => {
     fetch("/api/products")
       .then((res) => res.json())
       .then((data) => setProducts(Array.isArray(data) ? data : []));
   }, []);
+
+  function handleAddToCart(p: Product) {
+    if (!user) {
+      localStorage.setItem(
+        "pendingCartItem",
+        JSON.stringify({
+          productId: p.id,
+          name: p.name,
+          price: Number(p.price),
+          storeId: p.storeId,
+        }),
+      );
+      router.push("/login");
+      return;
+    }
+
+    addItem({
+      productId: p.id,
+      name: p.name,
+      price: Number(p.price),
+      storeId: p.storeId,
+    });
+  }
 
   return (
     <div className="max-w-6xl mx-auto px-6 py-10">
@@ -81,14 +106,7 @@ export default function ProductsPage() {
                 {user?.role !== "SELLER" && (
                   <button
                     disabled={soldOut}
-                    onClick={() =>
-                      addItem({
-                        productId: p.id,
-                        name: p.name,
-                        price: Number(p.price),
-                        storeId: p.storeId,
-                      })
-                    }
+                    onClick={() => handleAddToCart(p)}
                     className="mt-3 bg-brand text-white py-2 rounded-full text-sm font-medium hover:bg-brand/90 transition disabled:bg-ink/20 disabled:cursor-not-allowed"
                   >
                     {soldOut ? "Sold out" : "Add to cart"}
