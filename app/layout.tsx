@@ -4,6 +4,7 @@ import "./globals.css";
 import { CartProvider } from "@/lib/cart-context";
 import Header from "@/app/components/Header";
 import { AuthProvider } from "@/lib/auth-context";
+import { Toaster } from "sonner";
 
 const fraunces = Fraunces({
   subsets: ["latin"],
@@ -35,6 +36,17 @@ export default function RootLayout({
         <AuthProvider>
           <CartProvider>
             <Header />
+            <Toaster
+              position="top-center"
+              toastOptions={{
+                style: {
+                  background: "#FFFDF9",
+                  color: "#3B2418",
+                  border: "1px solid rgba(59, 36, 24, 0.1)",
+                  borderRadius: "1rem",
+                },
+              }}
+            />
             {children}
           </CartProvider>
         </AuthProvider>

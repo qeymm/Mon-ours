@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 interface Product {
   id: string;
@@ -72,6 +73,7 @@ export default function SellerProductsPage() {
       setError(data.error?.formErrors?.[0] || "Failed to create product");
       return;
     }
+    toast.success("Product added");
 
     // NEW: auto-feature it if it's a daily bake
     if (form.isDailyDrop) {
@@ -121,10 +123,10 @@ export default function SellerProductsPage() {
 
     const data = await res.json();
     if (!res.ok) {
-      alert(data.error);
+      toast.error(data.error);
       return;
     }
-
+    toast.success("Product updated");
     setEditingId(null);
     loadProducts();
   }
@@ -132,6 +134,7 @@ export default function SellerProductsPage() {
   async function handleDelete(id: string) {
     if (!confirm("Delete this product?")) return;
     await fetch(`/api/products/${id}`, { method: "DELETE" });
+    toast.success("Product deleted");
     loadProducts();
   }
 

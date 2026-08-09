@@ -5,6 +5,7 @@ import { useAuth } from "@/lib/auth-context";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import Link from "next/link";
+import { toast } from "sonner";
 
 export default function CartPage() {
   const { items, removeItem, updateQuantity, total, clearCart } = useCart();
@@ -32,11 +33,12 @@ export default function CartPage() {
     const data = await res.json();
 
     if (!res.ok) {
-      alert(data.error);
+      toast.error(data.error);
       return;
     }
 
     clearCart();
+    toast.success("Order placed!");
     router.push("/orders");
   }
 

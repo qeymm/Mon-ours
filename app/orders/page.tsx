@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 interface OrderItem {
   id: string;
@@ -36,10 +37,10 @@ export default function OrderPage() {
     const data = await res.json();
 
     if (!res.ok) {
-      alert(data.error);
+      toast.error(data.error);
       return;
     }
-
+    toast.success("Order cancelled");
     setOrders((prev) =>
       prev.map((o) => (o.id === orderId ? { ...o, status: "CANCELLED" } : o)),
     );

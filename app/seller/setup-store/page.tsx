@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 export default function SetupStorePage() {
   const router = useRouter();
@@ -24,7 +25,7 @@ export default function SetupStorePage() {
       setError(data.error || "Something went wrong");
       return;
     }
-
+    toast.success("Shop created!");
     router.push("/seller/orders");
   }
 

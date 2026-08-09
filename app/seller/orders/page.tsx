@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 interface SellerOrderItem {
   id: string;
@@ -64,10 +65,11 @@ export default function SellerOrdersPage() {
     const data = await res.json();
 
     if (!res.ok) {
-      alert(data.error);
+      toast.error(data.error);
       return;
     }
 
+    toast.success(`Marked as ${status.toLowerCase()}`);
     setGroups((prev) =>
       prev.map((g) => (g.orderId === orderId ? { ...g, status } : g)),
     );
