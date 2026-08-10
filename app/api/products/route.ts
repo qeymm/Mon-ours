@@ -55,11 +55,13 @@ export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const storeId = searchParams.get("storeId");
   const dailyOnly = searchParams.get("dailyDrop") === "true";
+  const search = searchParams.get("search");
 
   const products = await prisma.product.findMany({
     where: {
       ...(storeId ? { storeId } : {}),
       ...(dailyOnly ? { isDailyDrop: true } : {}),
+      ...(search ? { name: { contains: search, mode: "insensitive" } } : {}),
     },
     include: { store: { select: { id: true, storeName: true } } },
     orderBy: { createdAt: "desc" },
