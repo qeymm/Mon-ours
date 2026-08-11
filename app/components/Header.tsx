@@ -26,7 +26,7 @@ export default function Header() {
   }, [bumpCount]);
 
   return (
-    <header className="bg-surface border-b border-ink/10">
+    <header className="sticky top-0 z-50 bg-surface border-b border-ink/10">
       <div className="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
         <Link
           href="/"
