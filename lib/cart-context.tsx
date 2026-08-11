@@ -17,12 +17,14 @@ interface CartContextType {
   updateQuantity: (productId: string, quantity: number) => void;
   clearCart: () => void;
   total: number;
+  bumpCount: number;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
+  const [bumpCount, setBumpCount] = useState(0);
 
   function addItem(item: Omit<CartItem, "quantity">) {
     setItems((prev) => {
@@ -36,7 +38,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
       }
       return [...prev, { ...item, quantity: 1 }];
     });
+    setBumpCount((c) => c + 1);
   }
+
   function removeItem(productId: string) {
     setItems((prev) => prev.filter((i) => i.productId !== productId));
   }
@@ -56,7 +60,15 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   return (
     <CartContext.Provider
-      value={{ items, addItem, removeItem, updateQuantity, clearCart, total }}
+      value={{
+        items,
+        addItem,
+        removeItem,
+        updateQuantity,
+        clearCart,
+        total,
+        bumpCount,
+      }}
     >
       {children}
     </CartContext.Provider>

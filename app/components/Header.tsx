@@ -4,17 +4,26 @@ import Link from "next/link";
 import { useCart } from "@/lib/cart-context";
 import { useAuth } from "@/lib/auth-context";
 import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
 
 export default function Header() {
-  const { items } = useCart();
+  const { items, bumpCount } = useCart();
   const router = useRouter();
   const { user, logout } = useAuth();
   const itemCount = items.reduce((sum, i) => sum + i.quantity, 0);
+  const [bumping, setBumping] = useState(false);
 
   async function handleLogout() {
     await logout();
     router.push("/login");
   }
+
+  useEffect(() => {
+    if (bumpCount === 0) return; // skip on initial mount
+    setBumping(true);
+    const timeout = setTimeout(() => setBumping(false), 300);
+    return () => clearTimeout(timeout);
+  }, [bumpCount]);
 
   return (
     <header className="bg-surface border-b border-ink/10">
@@ -55,7 +64,10 @@ export default function Header() {
           )}
 
           {user?.role !== "SELLER" && (
-            <Link href="/cart" className="hover:text-accent transition">
+            <Link
+              href="/cart"
+              className={`hover:text-accent transition-transform ${bumping ? "scale-150" : "scale-100"}`}
+            >
               Cart {itemCount > 0 && `(${itemCount})`}
             </Link>
           )}
