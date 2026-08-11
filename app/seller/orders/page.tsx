@@ -25,9 +25,18 @@ interface GroupedOrder {
   items: SellerOrderItem[];
 }
 
+interface Analytics {
+  totalRevenue: number;
+  totalOrders: number;
+  pendingCount: number;
+  deliveredCount: number;
+  topProducts: { name: string; quantity: number; revenue: number }[];
+}
+
 export default function SellerOrdersPage() {
   const [groups, setGroups] = useState<GroupedOrder[]>([]);
   const [loading, setLoading] = useState(true);
+  const [analytics, setAnalytics] = useState<Analytics | null>(null);
 
   useEffect(() => {
     fetch("/api/seller/orders")
@@ -53,6 +62,10 @@ export default function SellerOrdersPage() {
         setGroups(Array.from(map.values()));
         setLoading(false);
       });
+
+    fetch("/api/seller/analytics")
+      .then((res) => res.json())
+      .then(setAnalytics);
   }, []);
 
   async function updateStatus(
@@ -75,6 +88,10 @@ export default function SellerOrdersPage() {
     setGroups((prev) =>
       prev.map((g) => (g.orderId === orderId ? { ...g, status } : g)),
     );
+
+    fetch("/api/seller/analytics")
+      .then((res) => res.json())
+      .then(setAnalytics);
   }
 
   const statusStyles: Record<string, string> = {
@@ -120,6 +137,55 @@ export default function SellerOrdersPage() {
       <h1 className="font-display text-2xl font-semibold text-ink mb-6">
         Incoming Orders
       </h1>
+
+      {analytics && (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+          <div className="bg-surface border border-ink/10 rounded-2xl p-4">
+            <p className="text-xs text-ink/50 mb-1">Total Revenue</p>
+            <p className="font-display text-2xl font-semibold text-accent">
+              ${analytics.totalRevenue.toFixed(2)}
+            </p>
+          </div>
+          <div className="bg-surface border border-ink/10 rounded-2xl p-4">
+            <p className="text-xs text-ink/50 mb-1">Total Orders</p>
+            <p className="font-display text-2xl font-semibold text-ink">
+              {analytics.totalOrders}
+            </p>
+          </div>
+          <div className="bg-surface border border-ink/10 rounded-2xl p-4">
+            <p className="text-xs text-ink/50 mb-1">Pending</p>
+            <p className="font-display text-2xl font-semibold text-amber-600">
+              {analytics.pendingCount}
+            </p>
+          </div>
+          <div className="bg-surface border border-ink/10 rounded-2xl p-4">
+            <p className="text-xs text-ink/50 mb-1">Delivered</p>
+            <p className="font-display text-2xl font-semibold text-green-600">
+              {analytics.deliveredCount}
+            </p>
+          </div>
+        </div>
+      )}
+
+      {analytics && analytics.topProducts.length > 0 && (
+        <div className="bg-surface border border-ink/10 rounded-2xl p-5 mb-8">
+          <h2 className="font-display font-semibold text-ink mb-3">
+            Top Sellers
+          </h2>
+          <div className="space-y-2">
+            {analytics.topProducts.map((p, i) => (
+              <div key={i} className="flex justify-between text-sm">
+                <span className="text-ink/70">
+                  {p.name} × {p.quantity}
+                </span>
+                <span className="text-accent font-medium">
+                  ${p.revenue.toFixed(2)}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="space-y-4">
         {groups.map((group) => (
