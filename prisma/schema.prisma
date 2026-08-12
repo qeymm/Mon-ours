@@ -23,6 +23,7 @@ model User {
   orders    Order[]
 
   store        Store?   // a seller may have one store
+reviews Review[]
 }
 
 model Store {
@@ -54,6 +55,7 @@ model Product {
   batchQuantity Int?        // total made that day
   quantitySold  Int         @default(0)
   featuredByStore   Store?   @relation("FeaturedProduct")
+  reviews Review[]
 }
 
 enum OrderStatus {
@@ -81,4 +83,17 @@ model OrderItem {
   product          Product @relation(fields: [productId], references: [id])
   quantity         Int
   priceAtPurchase  Decimal
+}
+
+model Review {
+  id        String   @id @default(uuid())
+  productId String
+  product   Product  @relation(fields: [productId], references: [id])
+  buyerId   String
+  buyer     User     @relation(fields: [buyerId], references: [id])
+  rating    Int
+  comment   String?
+  createdAt DateTime @default(now())
+
+  @@unique([productId, buyerId])
 }

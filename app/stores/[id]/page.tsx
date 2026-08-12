@@ -7,6 +7,7 @@ import { useAuth } from "@/lib/auth-context";
 import { useRouter, useParams } from "next/navigation";
 import { Skeleton } from "@/app/components/skeleton";
 import { EmptyState } from "@/app/components/EmptyState";
+import { StarRating } from "@/app/components/StarRating";
 
 interface Product {
   id: string;
@@ -18,6 +19,8 @@ interface Product {
   stock: number;
   batchQuantity: number | null;
   quantitySold: number;
+  averageRating: number | null;
+  reviewCount: number;
 }
 
 interface Store {
@@ -157,6 +160,19 @@ export default function StorePage() {
                   <p className="font-display font-semibold text-ink">
                     {p.name}
                   </p>
+                  {p.reviewCount > 0 ? (
+                    <div className="flex items-center gap-1 mt-0.5">
+                      <StarRating
+                        value={Math.round(p.averageRating ?? 0)}
+                        size="sm"
+                      />
+                      <span className="text-xs text-ink/50">
+                        ({p.reviewCount})
+                      </span>
+                    </div>
+                  ) : (
+                    <p className="text-xs text-ink/40 mt-0.5">No reviews yet</p>
+                  )}
 
                   <div className="mt-auto flex justify-between items-center">
                     <span className="text-accent font-semibold">

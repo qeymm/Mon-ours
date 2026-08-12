@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { Skeleton } from "@/app/components/skeleton";
+import { StarRating } from "@/app/components/StarRating";
 
 interface FeaturedEntry {
   id: string;
@@ -16,6 +17,8 @@ interface FeaturedEntry {
     stock: number;
     batchQuantity: number | null;
     quantitySold: number;
+    averageRating: number | null;
+    reviewCount: number;
   } | null;
 }
 
@@ -116,6 +119,25 @@ export default function Hero() {
                       <p className="font-display font-semibold text-ink">
                         {p.name}
                       </p>
+                      <p className="font-display font-semibold text-ink">
+                        {p.name}
+                      </p>
+
+                      {p.reviewCount > 0 ? (
+                        <div className="flex items-center gap-1 mt-0.5">
+                          <StarRating
+                            value={Math.round(p.averageRating ?? 0)}
+                            size="sm"
+                          />
+                          <span className="text-xs text-ink/50">
+                            ({p.reviewCount})
+                          </span>
+                        </div>
+                      ) : (
+                        <p className="text-xs text-ink/40 mt-0.5">
+                          No reviews yet
+                        </p>
+                      )}
                       <p className="text-sm text-ink/60">{entry.storeName}</p>
                       <div className="flex justify-between items-center mt-2">
                         <span className="text-accent font-semibold">

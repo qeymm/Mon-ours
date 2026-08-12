@@ -63,9 +63,22 @@ export async function GET(req: NextRequest) {
       ...(dailyOnly ? { isDailyDrop: true } : {}),
       ...(search ? { name: { contains: search, mode: "insensitive" } } : {}),
     },
-    include: { store: { select: { id: true, storeName: true } } },
+    include: {
+      store: { select: { id: true, storeName: true } },
+      reviews: { select: { rating: true } },
+    },
     orderBy: { createdAt: "desc" },
   });
 
-  return NextResponse.json(products);
+  const withRatings = products.map((p) => {
+    const count = p.reviews.length;
+    const average =
+      count > 0
+        ? p.reviews.reduce((sum, r) => sum + r.rating, 0) / count
+        : null;
+    const { reviews, ...rest } = p;
+    return { ...rest, averageRating: average, reviewCount: count };
+  });
+
+  return NextResponse.json(withRatings);
 }

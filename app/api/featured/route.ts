@@ -17,10 +17,26 @@ export async function GET() {
           stock: true,
           batchQuantity: true,
           quantitySold: true,
+          reviews: { select: { rating: true } },
         },
       },
     },
   });
 
-  return NextResponse.json(stores);
+  const withRatings = stores.map((s) => {
+    if (!s.featuredProduct) return s;
+    const count = s.featuredProduct.reviews.length;
+    const average =
+      count > 0
+        ? s.featuredProduct.reviews.reduce((sum, r) => sum + r.rating, 0) /
+          count
+        : null;
+    const { reviews, ...rest } = s.featuredProduct;
+    return {
+      ...s,
+      featuredProduct: { ...rest, averageRating: average, reviewCount: count },
+    };
+  });
+
+  return NextResponse.json(withRatings);
 }

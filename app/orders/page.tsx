@@ -4,11 +4,13 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Skeleton } from "@/app/components/skeleton";
 import { EmptyState } from "@/app/components/EmptyState";
+import { StarRating } from "../components/StarRating";
 
 interface OrderItem {
   id: string;
   quantity: number;
   priceAtPurchase: string;
+  productId: string;
   product: { name: string; imageUrl: string | null };
 }
 
@@ -23,6 +25,11 @@ interface Order {
 export default function OrderPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+  const [reviewingProductId, setReviewingProductId] = useState<string | null>(
+    null,
+  );
+  const [rating, setRating] = useState(0);
+  const [comment, setComment] = useState("");
 
   useEffect(() => {
     fetch("/api/orders")
@@ -32,6 +39,26 @@ export default function OrderPage() {
         setLoading(false);
       });
   }, []);
+
+  async function handleSubmitReview(productId: string) {
+    const res = await fetch("/api/reviews", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ productId, rating, comment }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      toast.error(data.error);
+      return;
+    }
+
+    toast.success("Review submitted!");
+    setReviewingProductId(null);
+    setRating(0);
+    setComment("");
+  }
 
   async function handleCancel(orderId: string) {
     const res = await fetch(`/api/orders/${orderId}/cancel`, {
@@ -112,11 +139,54 @@ export default function OrderPage() {
                 </span>
               </div>
 
-              <ul className="text-sm text-ink/60 space-y-1 mb-3">
+              <ul className="text-sm text-ink/60 space-y-2 mb-3">
                 {order.orderItems.map((item) => (
                   <li key={item.id}>
-                    {item.quantity} × {item.product.name} — $
-                    {item.priceAtPurchase}
+                    <div className="flex justify-between items-center">
+                      <span>
+                        {item.quantity} × {item.product.name} — $
+                        {item.priceAtPurchase}
+                      </span>
+                      {order.status === "DELIVERED" &&
+                        reviewingProductId !== item.productId && (
+                          <button
+                            onClick={() =>
+                              setReviewingProductId(item.productId)
+                            }
+                            className="text-accent text-xs hover:underline"
+                          >
+                            Leave a review
+                          </button>
+                        )}
+                    </div>
+
+                    {reviewingProductId === item.productId && (
+                      <div className="mt-2 bg-background rounded-lg p-3 space-y-2">
+                        <StarRating value={rating} onChange={setRating} />
+                        <textarea
+                          placeholder="Optional comment..."
+                          value={comment}
+                          onChange={(e) => setComment(e.target.value)}
+                          className="border border-ink/15 p-2 w-full rounded-lg bg-white text-sm"
+                          rows={2}
+                        />
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => handleSubmitReview(item.productId)}
+                            disabled={rating === 0}
+                            className="bg-brand text-white px-3 py-1 rounded-full text-xs disabled:bg-ink/20"
+                          >
+                            Submit
+                          </button>
+                          <button
+                            onClick={() => setReviewingProductId(null)}
+                            className="text-ink/50 text-xs hover:underline"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </li>
                 ))}
               </ul>

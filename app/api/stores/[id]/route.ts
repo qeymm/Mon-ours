@@ -10,7 +10,10 @@ export async function GET(
   const store = await prisma.store.findUnique({
     where: { id },
     include: {
-      products: { orderBy: { createdAt: "desc" } },
+      products: {
+        orderBy: { createdAt: "desc" },
+        include: { reviews: { select: { rating: true } } },
+      },
     },
   });
 
@@ -18,5 +21,15 @@ export async function GET(
     return NextResponse.json({ error: "Store not found" }, { status: 404 });
   }
 
-  return NextResponse.json(store);
+  const productsWithRatings = store.products.map((p) => {
+    const count = p.reviews.length;
+    const average =
+      count > 0
+        ? p.reviews.reduce((sum, r) => sum + r.rating, 0) / count
+        : null;
+    const { reviews, ...rest } = p;
+    return { ...rest, averageRating: average, reviewCount: count };
+  });
+
+  return NextResponse.json({ ...store, products: productsWithRatings });
 }
