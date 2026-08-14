@@ -5,6 +5,7 @@ import { CartProvider } from "@/lib/cart-context";
 import Header from "@/app/components/Header";
 import { AuthProvider } from "@/lib/auth-context";
 import { Toaster } from "sonner";
+import Footer from "./components/Footer";
 
 const fraunces = Fraunces({
   subsets: ["latin"],
@@ -32,11 +33,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${fraunces.variable} ${workSans.variable} font-body bg-background text-ink`}
+        className={`${fraunces.variable} ${workSans.variable} font-body bg-background text-ink min-h-screen flex flex-col`}
       >
         <AuthProvider>
           <CartProvider>
-            <Header />
+            <Header /> <div className="flex-1"> {children} </div>
             <Toaster
               position="top-center"
               toastOptions={{
@@ -48,7 +49,7 @@ export default function RootLayout({
                 },
               }}
             />
-            {children}
+            <Footer></Footer>
           </CartProvider>
         </AuthProvider>
       </body>

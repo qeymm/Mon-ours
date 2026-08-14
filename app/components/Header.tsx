@@ -36,6 +36,9 @@ export default function Header() {
         </Link>
 
         <nav className="flex items-center gap-6 text-sm text-ink/80">
+          <Link href="/about" className="hover:text-accent transition">
+            About
+          </Link>
           <Link href="/products" className="hover:text-accent transition">
             Products
           </Link>
