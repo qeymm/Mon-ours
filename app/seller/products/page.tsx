@@ -9,6 +9,7 @@ interface Product {
   name: string;
   price: string;
   stock: number;
+  imageUrl: string | null;
   isDailyDrop: boolean;
   batchQuantity: number | null;
   quantitySold: number;
@@ -19,13 +20,19 @@ export default function SellerProductsPage() {
   const [storeId, setStoreId] = useState<string | null>(null);
   const [featuredId, setFeaturedId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [editForm, setEditForm] = useState({ name: "", price: "", stock: "" });
+  const [editForm, setEditForm] = useState({
+    name: "",
+    price: "",
+    stock: "",
+    imageUrl: "",
+  });
   const [form, setForm] = useState({
     name: "",
     price: "",
     stock: "",
     isDailyDrop: false,
     batchQuantity: "",
+    imageUrl: "",
   });
   const [error, setError] = useState("");
 
@@ -53,6 +60,7 @@ export default function SellerProductsPage() {
       name: form.name,
       price: Number(form.price),
       stock: Number(form.stock) || 0,
+      imageUrl: form.imageUrl || undefined,
     };
 
     if (form.isDailyDrop) {
@@ -91,6 +99,7 @@ export default function SellerProductsPage() {
       stock: "",
       isDailyDrop: false,
       batchQuantity: "",
+      imageUrl: "",
     });
     loadProducts();
   }
@@ -101,6 +110,7 @@ export default function SellerProductsPage() {
       name: p.name,
       price: p.price,
       stock: p.isDailyDrop ? String(p.batchQuantity ?? 0) : String(p.stock),
+      imageUrl: p.imageUrl ?? "",
     });
   }
 
@@ -108,6 +118,7 @@ export default function SellerProductsPage() {
     const body: Record<string, unknown> = {
       name: editForm.name,
       price: Number(editForm.price),
+      imageUrl: editForm.imageUrl || undefined,
     };
 
     if (isDailyDrop) {
@@ -156,6 +167,13 @@ export default function SellerProductsPage() {
           className="border border-ink/15 p-2 w-full rounded-lg bg-white"
           value={form.name}
           onChange={(e) => setForm({ ...form, name: e.target.value })}
+        />
+
+        <input
+          placeholder="Image URL (optional)"
+          className="border border-ink/15 p-2 w-full rounded-lg bg-white"
+          value={form.imageUrl}
+          onChange={(e) => setForm({ ...form, imageUrl: e.target.value })}
         />
 
         <div className="flex gap-3">
@@ -233,6 +251,14 @@ export default function SellerProductsPage() {
                   value={editForm.price}
                   onChange={(e) =>
                     setEditForm({ ...editForm, price: e.target.value })
+                  }
+                />
+                <input
+                  className="border border-ink/15 p-2 rounded-lg bg-white w-40"
+                  placeholder="Image URL"
+                  value={editForm.imageUrl}
+                  onChange={(e) =>
+                    setEditForm({ ...editForm, imageUrl: e.target.value })
                   }
                 />
                 <input
